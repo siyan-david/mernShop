@@ -46,7 +46,7 @@ const productSchema = Schema(
       required: true,
       default: 0,
     },
-    countInstock: {
+    countInStock: {
       type: Number,
       required: true,
       default: 0,
@@ -56,7 +56,7 @@ const productSchema = Schema(
       required: true,
       default: 0,
     },
-    reviws: [reviewSchema], //The averge overral of reviews.
+    reviews: [reviewSchema], //The averge overral of reviews.
     numReviews: {
       type: Number,
       required: true,
