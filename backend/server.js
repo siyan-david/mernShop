@@ -5,17 +5,22 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js'
 import connectDB from './config/db.js'
 // import products from './data/products.js'
 import productRoute from './routes/productRoute.js'
+import userRoutes from './routes/userRoutes.js'
 
 dotenv.config()
 connectDB()
 
 const app = express()
 
+//body parser
+app.use(express.json())
+
 app.get('/', (req, res) => {
   res.send('API is running...')
 })
 
 app.use('/api/products', productRoute)
+app.use('/api/users', userRoutes)
 
 // custom 404 error middleware
 app.use(notFound)

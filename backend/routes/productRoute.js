@@ -1,6 +1,10 @@
 import express from 'express'
-import asyncHandler from 'express-async-handler'
-import Product from '../models/productModel.js'
+// import asyncHandler from 'express-async-handler'
+// import Product from '../models/productModel.js'
+import {
+  getProducts,
+  getProductById,
+} from '../controllers/productController.js'
 const router = express.Router()
 
 /* 
@@ -9,6 +13,7 @@ const router = express.Router()
 @access Public
 */
 
+/*
 router.get(
   '/',
   asyncHandler(async (req, res) => {
@@ -19,12 +24,19 @@ router.get(
   })
 )
 
+*/
+//********************************* */
+
+router.route('/').get(getProducts)
+router.route('/:id').get(getProductById)
+
 /* 
 @desc  Fetch single products
 @route GET /api/products/:id
 @access Public
 */
 
+/*
 router.get(
   '/:id',
   asyncHandler(async (req, res) => {
@@ -40,5 +52,6 @@ router.get(
     }
   })
 )
+*/
 
 export default router
