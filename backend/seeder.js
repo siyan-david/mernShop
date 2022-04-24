@@ -48,7 +48,7 @@ const destroyData = async () => {
   }
 }
 
-//script in packkage.json
+//script in package.json
 if (process.argv[2] === '-d') {
   destroyData()
 } else {

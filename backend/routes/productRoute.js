@@ -4,7 +4,14 @@ import express from 'express'
 import {
   getProducts,
   getProductById,
+  deleteProductById,
+  createProduct,
+  updateProduct,
 } from '../controllers/productController.js'
+
+import upload from '../middleware/fileUpload.js'
+import { protect, admin } from '../middleware/authMiddleware.js'
+
 const router = express.Router()
 
 /* 
@@ -28,7 +35,13 @@ router.get(
 //********************************* */
 
 router.route('/').get(getProducts)
-router.route('/:id').get(getProductById)
+router.post('/', upload.single('image'), protect, admin, createProduct)
+
+router
+  .route('/:id')
+  .get(getProductById)
+  .delete(protect, admin, deleteProductById)
+  .patch(protect, admin, updateProduct)
 
 /* 
 @desc  Fetch single products
@@ -46,7 +59,7 @@ router.get(
     if (product) {
       res.json(product)
     } else {
-      // res.status(404).json({ messagge: 'Product not found' })
+      // res.status(404).json({ message: 'Product not found' })
       res.status(404)
       throw new Error('Product not found')
     }

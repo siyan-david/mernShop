@@ -23,7 +23,7 @@ const ProductScreen = () => {
   useEffect(() => {
     // fetch single product with the unique ID
     
-    const fetchPoduct = async () => {
+    const fetchProduct = async () => {
       const { data } = await axios.get(
         `/api/products/${encodeURIComponent(id)}`
       )
@@ -52,7 +52,7 @@ const ProductScreen = () => {
       {loading ? (
         <Loader />
       ) : error ? (
-        <Message varient='danger'>{error}</Message>
+        <Message variant='danger'>{error}</Message>
       ) : (
         <Row>
           <Col md={6}>

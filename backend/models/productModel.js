@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 const { Schema, model } = mongoose
 
-//The indevidual rating object field structure
+//The individual rating object field structure
 const reviewSchema = Schema(
   {
     name: { type: String, required: true },
@@ -51,12 +51,13 @@ const productSchema = Schema(
       required: true,
       default: 0,
     },
+    //The average overral of reviews.
     rating: {
       type: Number,
       required: true,
       default: 0,
     },
-    reviews: [reviewSchema], //The averge overral of reviews.
+    reviews: [reviewSchema],
     numReviews: {
       type: Number,
       required: true,

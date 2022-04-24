@@ -2,18 +2,10 @@ import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  Card,
-  Row,
-  Col,
-  ListGroup,
-  Image,
-  Form,
-  Button,
-  ListGroupItem,
-} from 'react-bootstrap'
+import { Card, Row, Col, ListGroup, Button } from 'react-bootstrap'
 import Message from '../components/Message'
-import { addToCart, removeFromCart } from '../actions/CartActions'
+import { addToCart } from '../actions/CartActions'
+import CartItems from '../components/CartItems'
 
 const CartScreen = () => {
   const { id } = useParams()
@@ -24,11 +16,15 @@ const CartScreen = () => {
 
   //?qty=1
   const qty = location.search ? Number(location.search.split('=')[1]) : 1
+  // const shipping = location.search ? location.search.split('=')[1] : 'shipping'
   // console.log(qty)
 
   const cart = useSelector((state) => state.cart)
   const { cartItems } = cart
-  console.log(cartItems)
+  // console.log(cartItems)
+
+  const userLogin = useSelector((state) => state.userLogin)
+  const { userInfo } = userLogin
 
   const dispatch = useDispatch()
 
@@ -39,14 +35,15 @@ const CartScreen = () => {
     }
   }, [dispatch, productId, qty])
 
-  const removeFromcartHandler = (id) => {
-    // console.log('remove')
-    dispatch(removeFromCart(id))
-  }
-
-  const checkOutHandler = () => {
+  const checkOutHandler = (e) => {
     console.log('checkout')
-    navigate('/login?redirect=shipping')
+    e.preventDefault()
+    if (!userInfo) return navigate('/login')
+    navigate('/shipping')
+
+    // navigate(`/login?redirect=shipping`)
+
+    // history.push('login?redirect=shipping')
   }
 
   return (
@@ -59,46 +56,9 @@ const CartScreen = () => {
               Your cart is empty <Link to='/'>Go Back</Link>
             </Message>
           ) : (
-            <ListGroup varient='flush'>
-              {cartItems.map((item) => (
-                // <CartItems key={el.product} item={el} />
-                <ListGroup.Item key={item.product}>
-                  <Row>
-                    <Col md={2}>
-                      <Image src={item.image} alt={item.name} fluid rounded />
-                    </Col>
-                    <Col md={3}>
-                      <Link to={`/product/${item.product}`}>{item.name}</Link>
-                    </Col>
-                    <Col md={2}>${item.price}</Col>
-                    <Col md={2}>
-                      <Form.Control
-                        as='select'
-                        value={item.qty}
-                        onChange={(e) =>
-                          dispatch(
-                            addToCart(item.product, Number(e.target.value))
-                          )
-                        }
-                      >
-                        {[...Array(item.countInStock).keys()].map((x) => (
-                          <option key={x + 1} value={x + 1}>
-                            {x + 1}
-                          </option>
-                        ))}
-                      </Form.Control>
-                    </Col>
-                    <Col md={2}>
-                      <Button
-                        type='button'
-                        varient='light'
-                        onClick={() => removeFromcartHandler(item.product)}
-                      >
-                        <i className='fas fa-trash'></i>
-                      </Button>
-                    </Col>
-                  </Row>
-                </ListGroup.Item>
+            <ListGroup variant='flush'>
+              {cartItems.map((el) => (
+                <CartItems key={el.product} item={el} />
               ))}
             </ListGroup>
           )}

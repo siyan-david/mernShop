@@ -9,7 +9,7 @@ const orderSchema = Schema(
       required: true,
       ref: 'User',
     },
-    orederItems: [
+    orderItems: [
       {
         name: { type: String, required: true },
         qty: { type: Number, required: true },
