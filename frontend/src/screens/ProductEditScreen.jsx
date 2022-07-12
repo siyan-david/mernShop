@@ -23,7 +23,8 @@ const ProductEditScreen = () => {
     category: '',
     countInStock: 0,
   })
-  const [image, setImage] = useState('')
+  // const [image, setImage] = useState('')
+  const [image, setImage] = useState(null)
   const [uploading, setUploading] = useState(false)
   const { name, price, brand, description, category, countInStock } =
     productData
@@ -65,7 +66,8 @@ const ProductEditScreen = () => {
   const submitHandler = (e) => {
     e.preventDefault()
     // UPDATE PRODUCT
-    dispatch(
+    dispatch()
+    /*
       updateProduct({
         _id: product._id,
         name,
@@ -76,7 +78,8 @@ const ProductEditScreen = () => {
         countInStock,
         image,
       })
-    )
+      */
+    updateProduct({})
   }
 
   const uploadFileHandler = async (e) => {

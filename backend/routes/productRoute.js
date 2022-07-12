@@ -6,6 +6,7 @@ import {
   getProductById,
   deleteProductById,
   createProduct,
+  createProductReview,
   updateProduct,
 } from '../controllers/productController.js'
 
@@ -42,6 +43,8 @@ router
   .get(getProductById)
   .delete(protect, admin, deleteProductById)
   .patch(protect, admin, updateProduct)
+
+router.route('/:id/reviews').post(protect, createProductReview)
 
 /* 
 @desc  Fetch single products

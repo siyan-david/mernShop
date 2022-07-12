@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Form, Button, Row, Col } from 'react-bootstrap'
+import { Form, Button, Col } from 'react-bootstrap'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 // import Message from '../components/Message'
@@ -12,7 +12,7 @@ const PaymentScreen = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const [paymentMethod, setPaymentMethod] = useState('PayPal')
+  const [paymentMethod, setPaymentMethod] = useState('')
   const { shippingAddress } = useSelector((state) => state.cart)
 
   if (!shippingAddress) return navigate('/shipping')
@@ -50,7 +50,7 @@ const PaymentScreen = () => {
                 id='Stripe'
                 name='paymentMethod'
                 value='Stripe'
-                checked
+                // checked={order.paymentMethod === 'Stripe'}
                 onChange={(e) => setPaymentMethod(e.target.value)}
               ></Form.Check>
             </Col>

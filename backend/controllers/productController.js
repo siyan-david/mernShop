@@ -38,26 +38,6 @@ const getProductById = asyncHandler(async (req, res) => {
 })
 
 /* 
-@desc  Delete a products
-@route DELETE /api/products/:id
-@access Private/Admin
-*/
-const deleteProductById = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id)
-  if (product) {
-    if (product.user.equals(req.user._id)) {
-      await product.remove()
-      res.json({ message: 'Product removed' })
-    }
-    res.status(401)
-    throw new Error('Unauthorized')
-  } else {
-    res.status(404)
-    throw new Error('Product not found')
-  }
-})
-
-/* 
 @desc  Create a products
 @route POST /api/products/
 @access Private/Admin
@@ -65,23 +45,28 @@ const deleteProductById = asyncHandler(async (req, res) => {
 
 const createProduct = asyncHandler(async (req, res, next) => {
   try {
-    if (!req.file) {
-      res.status(442)
+    const file = req.file
+    if (!file) {
+      res.status(404)
       throw new Error('No Image provided!')
     }
-    // const imagePath = req.path.replace(/\\/g, 'uploads/')
+    const fileName = file.filename
+    const basePath = `${req.protocol}://${req.get('host')}/uploads/`
+    // const imgPath = req.path.(/\\/g, 'uploads/')
+    // const imgPath = req.path.replace('\\', '/uploads')
     const product = new Product({
       name: req.body.name,
       user: req.user._id,
       price: req.body.price,
       // image: imagePath,
-      image: req.file.path,
+      image: `${basePath}${fileName}`,
       brand: req.body.brand,
       category: req.body.category,
       countInStock: req.body.countInStock,
       description: req.body.description,
     })
-    res.json(product)
+    console.log(product.image)
+    res.json(product.image)
     const createdProducts = product.save()
     if (createdProducts) {
       res.status(201).json({ message: 'Product created successfully' })
@@ -143,11 +128,12 @@ const updateProduct = asyncHandler(async (req, res) => {
     throw new Error('Product not found')
   }
 */
-
   const product = await Product.findById(req.params.id)
+  if (!req.file) return res.status(404).json({ message: 'No image provided' })
   const updatedProduct = await Product.findByIdAndUpdate(
     product._id,
-    { $set: { ...req.body }, image: req.file.image },
+    // { image: req.file.path },
+    { $set: { ...req.body } },
     { new: true }
   )
   if (!product) {
@@ -157,11 +143,72 @@ const updateProduct = asyncHandler(async (req, res) => {
   return res.status(200).json(updatedProduct)
 })
 
+/* 
+@desc  Create new review
+@route POST /api/products/:id/reviews
+@access Private/Admin
+*/
+const deleteProductById = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id)
+  if (product) {
+    if (product.user.equals(req.user._id)) {
+      await product.remove()
+      res.json({ message: 'Product removed' })
+    }
+    res.status(401)
+    throw new Error('Unauthorized')
+  } else {
+    res.status(404)
+    throw new Error('Product not found')
+  }
+})
+
+/* 
+@desc  Create new review
+@route POST /api/products/:id/reviews
+@access Private
+*/
+const createProductReview = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id)
+  const { rating, comment } = req.body
+  if (product) {
+    const alreadyReviewed = product.reviews.find(
+      (r) => r.user.toString() === req.user.toString()
+    )
+
+    if (alreadyReviewed) {
+      res.status(401)
+      throw new Error('Product already reviewed')
+    }
+    const review = {
+      name: req.user.name,
+      rating: Number(rating),
+      comment,
+      user: req.user._id,
+    }
+    // console.log(req.user)
+
+    product.reviews.push(review)
+    product.numReviews = product.reviews.length
+
+    // Average overral rating
+    product.rating =
+      product.reviews.reduce((prev, item) => item.rating + prev, 0) /
+      product.reviews.length
+    await product.save()
+    res.status(201).json({ message: 'Review added successfully' })
+  } else {
+    res.status(404)
+    throw new Error('Product not found')
+  }
+})
+
 export {
   getProducts,
   getProductsByAdmin,
   getProductById,
   deleteProductById,
   createProduct,
+  createProductReview,
   updateProduct,
 }

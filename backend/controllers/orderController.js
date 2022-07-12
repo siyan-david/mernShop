@@ -1,5 +1,9 @@
 import asyncHandler from 'express-async-handler'
 import Order from '../models/orderModel.js'
+import Stripe from 'stripe'
+import dotenv from 'dotenv'
+dotenv.config()
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 /* 
 @desc  Create new order
@@ -56,23 +60,34 @@ const getOrderById = asyncHandler(async (req, res) => {
 
 /* 
 @desc Update order to paid
-@route GET /api/orders/:id/pay
+@route PUT /api/orders/:id/pay
 @access Private
 */
 const updateOrderToPaid = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id)
   if (order) {
+    const { paymentMode } = req.body
     order.isPaid = !false
     order.paidAt = Date.now()
-    order.paymentResult = {
-      id: req.body.id,
-      status: req.body.status,
-      update_time: req.body.update_time,
-      email_address: req.body.payer.email_address,
+    if (paymentMode === 'paypal') {
+      order.paymentResult = {
+        type: 'paypal',
+        id: req.body.id,
+        status: req.body.status,
+        update_time: req.body.update_time,
+        email_address: req.body.payer.email_address,
+      }
+    } else if (paymentMode === 'stripe') {
+      order.paymentResult = {
+        type: 'stripe',
+        id: req.body.id,
+        status: req.body.status,
+        email_address: req.body.receipt_email,
+      }
     }
 
     const updatedOrder = await order.save()
-    res.json(updatedOrder)
+    res.status(201).json(updatedOrder)
   } else {
     res.status(404)
     throw new Error('Order not found')
@@ -109,8 +124,9 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
   if (order) {
     order.isDelivered = !false
     order.deliveredAt = Date.now()
+
     const updatedOrder = await order.save()
-    res.json(updatedOrder)
+    res.status(201).json(updatedOrder)
   } else {
     res.status(404)
     throw new Error('Order not found')

@@ -25,7 +25,6 @@ const LoginScreen = () => {
   useEffect(() => {
     if (userInfo) return navigate(redirect)
   }, [navigate, userInfo, redirect])
-
   const submitHandler = (e) => {
     e.preventDefault()
     // DISPATCH LOGIN

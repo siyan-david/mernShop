@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { PayPalButton } from 'react-paypal-button-v2'
+// import PaystackPayment from '../components/PaystackPayment'
 import { useParams } from 'react-router-dom'
-import { Button, Row, Col, ListGroup, Image, Card } from 'react-bootstrap'
+import {
+  Button,
+  Row,
+  Col,
+  ListGroup,
+  Image,
+  Card,
+  ListGroupItem,
+} from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+// import StripeCheckout from 'react-stripe-checkout'
 import Message from '../components/Message'
 import Loader from '../components/Loader'
+import Pay from '../components/Pay'
 import {
   getOrderDetails,
   payOrder,
@@ -16,12 +27,31 @@ import {
   ORDER_PAY_RESET,
   ORDER_DELIVER_RESET,
 } from '../constants/orderConstants'
+import { savePaymentMethod } from '../actions/CartActions'
+// require('dotenv').config()
 
+// const KEY = process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY
+// const KEY =
+//   'pk_test_51L1dNfF5w4dMwAahRxekeiX0HL5t7M31STT4D6eUlfy32AFDSEdFr8o3qIlj4ISGxsBM35rVW9G2s8zIy2EWdCVb00kuuwBoEv'
+// import { Elements } from '@stripe/react-stripe-js'
+// import { loadStripe } from '@stripe/stripe-js'
+// import CheckoutForm from '../components/CheckoutForm'
+
+// const stripePromise = loadStripe(
+//   'pk_test_51L1dNfF5w4dMwAahRxekeiX0HL5t7M31STT4D6eUlfy32AFDSEdFr8o3qIlj4ISGxsBM35rVW9G2s8zIy2EWdCVb00kuuwBoEv'
+// )
+
+// console.log(stripePromise)
 const OrderScreen = () => {
+  // const options = {
+  //   clientSecret: process.env.STRIPE_KEY,
+  // }
+  // console.log(options)
   const dispatch = useDispatch()
   const { id } = useParams()
   const navigate = useNavigate()
 
+  // const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY)
   const orderId = id
 
   const [sdkReady, setSdkReady] = useState(false)
@@ -31,6 +61,7 @@ const OrderScreen = () => {
   // console.log(order)
 
   const { userInfo } = useSelector((state) => state.userLogin)
+  // const { cartItems } = useSelector((state) => state.cart)
   // console.log(order)
 
   const orderPay = useSelector((state) => state.orderPay)
@@ -38,7 +69,8 @@ const OrderScreen = () => {
 
   const orderDeliver = useSelector((state) => state.orderDeliver)
   const { loading: loadingDeliver, success: successDeliver } = orderDeliver
-
+  // const [paystackPublicKey, setPaystackPublicKey] = useState('')
+  // const [stripeToken, setStripeToken] = useState(null)
   if (!loading) {
     //   Calculate prices
     const addDecimal = (num) => {
@@ -49,13 +81,53 @@ const OrderScreen = () => {
     )
   }
 
+  const successPaymentHandler = (paymentResult) => {
+    console(paymentResult)
+    dispatch(savePaymentMethod('paypal'))
+    dispatch(payOrder(orderId, { paymentResult, paymentMode: 'paypal' }))
+  }
+
+  // const successStripeHandler = (paymentResult) => {
+  //   console.log(paymentResult)
+  //   dispatch(payOrder(orderId, { paymentResult }))
+  // }
+
+  // const stackSuccessHandler = (req, res) => {
+  //   console.log(res.status(200))
+
+  //   if (res.status !== 'success') {
+  //     // redirect to a failure page.
+  //     throw new Error('Failed Resource')
+  //   }
+
+  //   const paymentResult = {
+  //     id: res.transaction,
+  //     status: res.status,
+  //     update_time: new Date(Date.now()).toISOString(),
+  //     // email_address: res.customer.email,
+  //     // reference
+  //   }
+
+  //   dispatch(payOrder(orderId, paymentResult))
+  // }
+
+  useEffect(() => {
+    if (!order || order._id !== orderId || successPay || successDeliver) {
+      if (successPay) return dispatch({ type: ORDER_PAY_RESET })
+      if (successDeliver) return dispatch({ type: ORDER_DELIVER_RESET })
+      dispatch(getOrderDetails(orderId))
+    }
+  }, [order, orderId, dispatch, successPay, successDeliver])
+
   // Add PayPal Script with the Sdk
   useEffect(() => {
     if (!userInfo) {
       navigate('/login')
     }
+
     const addPayPalScript = async () => {
       const { data: clientId } = await axios.get('/api/config/paypal')
+      // console.log(clientId)
       const script = document.createElement('script')
       script.type = 'text/javascript'
       script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`
@@ -65,27 +137,46 @@ const OrderScreen = () => {
       }
       document.body.appendChild(script)
     }
+    if (!userInfo) navigate('/login')
+    if (!sdkReady) addPayPalScript()
+  }, [
+    dispatch,
+    navigate,
+    orderId,
+    sdkReady,
+    userInfo,
+    order,
+    successPay,
+    successDeliver,
+  ])
 
-    if (!order || successPay || successDeliver) {
-      dispatch({ type: ORDER_PAY_RESET })
-      dispatch({ type: ORDER_DELIVER_RESET })
-      dispatch(getOrderDetails(orderId))
-    } else if (!order.isPaid) {
-      if (!window.paypal) {
-        addPayPalScript()
-      }
-      return setSdkReady(true)
-    }
-  }, [dispatch, navigate, orderId, userInfo, order, successPay, successDeliver])
+  // const onToken = (token) => {
+  //   setStripeToken(token)
+  // }
 
-  const successPaymentHandler = (paymentResult) => {
-    console.log(paymentResult)
-    dispatch(payOrder(orderId, paymentResult))
-  }
+  // useEffect(() => {
+  //   const makeRequest = async () => {
+  //     try {
+  //       const { data } = await axios.post('/api/v1/stripe-payment', {
+  //         tokenId: stripeToken.id,
+  //         amount: 1000,
+  //       })
+  //       navigate('/', {
+  //         stripeData: data,
+  //         product: cartItems,
+  //       })
+  //     } catch (error) {
+  //       throw new Error(error.message)
+  //     }
+  //   }
+  //   if (!userInfo) navigate('/login')
+  //   stripeToken && makeRequest()
+  // }, [stripeToken, cartItems, navigate, userInfo])
 
   const deliverHandler = () => {
     dispatch(deliverOrder(order))
   }
+
   return loading ? (
     <Loader />
   ) : error ? (
@@ -191,19 +282,69 @@ const OrderScreen = () => {
                                   <Col>${order.totalPrice}</Col>
                                 </Row>
                               </ListGroup.Item>
+                              {/* 
                               {!order.isPaid && (
                                 <ListGroup.Item>
                                   {loadingPay && <Loader />}
                                   {!sdkReady ? (
                                     <Loader />
+                                  ) : order.paymentMethod === 'PayPal' ? (
+                                    <>
+                                      <PayPalButton
+                                        amount={order.totalPrice}
+                                        onSuccess={successPaymentHandler}
+                                      />
+                                    </>
+                                  ) : order.paymentMethod === 'stripe' ? (
+                                    <>
+                                      <StripeCheckout
+                                        name='Shop'
+                                        billingAddress
+                                        shippingAddress
+                                        token={onToken}
+                                        onSuccess={successStripeHandler}
+                                        stripeKey={KEY}
+                                        description={`Your total is $${cartItems.totalPrice}`}
+                                        amount={cartItems.totalPrice * 100}
+                                      >
+                                        <button>CHECKOUT Now</button>
+                                      </StripeCheckout>
+                                    </>
                                   ) : (
-                                    <PayPalButton
-                                      amount={order.totalPrice}
-                                      onSuccess={successPaymentHandler}
-                                    />
+                                    {}
                                   )}
                                 </ListGroup.Item>
+                              )} */}
+
+                              {!order.isPaid && (
+                                <ListGroup.Item>
+                                  {loadingPay && <Loader />}
+                                  {!sdkReady ? (
+                                    <Loader />
+                                  ) : order.paymentMethod === 'PayPal' ? (
+                                    <>
+                                      <PayPalButton
+                                        amount={order.totalPrice}
+                                        onSuccess={successPaymentHandler}
+                                      />
+                                    </>
+                                  ) : null}
+                                </ListGroup.Item>
                               )}
+
+                              {!order.isPaid && (
+                                <ListGroup.Item>
+                                  {loadingPay && <Loader />}
+                                  {!sdkReady ? (
+                                    <Loader />
+                                  ) : order.paymentMethod === 'Stripe' ? (
+                                    <>
+                                      <Pay />
+                                    </>
+                                  ) : null}
+                                </ListGroup.Item>
+                              )}
+
                               {loadingDeliver && <Loader />}
                               {userInfo &&
                                 userInfo.isAdmin &&

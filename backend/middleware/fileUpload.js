@@ -1,4 +1,5 @@
 import multer from 'multer'
+import { diskStorage } from 'multer'
 // import sharp from 'sharp/lib/sharp'
 import path from 'path'
 // multer storage configuration engine
