@@ -4,6 +4,7 @@ import express from 'express'
 import {
   getProducts,
   getProductById,
+  getTopProducts,
   deleteProductById,
   createProduct,
   createProductReview,
@@ -37,6 +38,7 @@ router.get(
 
 router.route('/').get(getProducts)
 router.post('/', upload.single('image'), protect, admin, createProduct)
+router.get('/top', getTopProducts)
 
 router
   .route('/:id')

@@ -1,6 +1,7 @@
 import StripeCheckout from 'react-stripe-checkout'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import { Button } from 'react-bootstrap'
 const KEY =
   'pk_test_51L1dNfF5w4dMwAahRxekeiX0HL5t7M31STT4D6eUlfy32AFDSEdFr8o3qIlj4ISGxsBM35rVW9G2s8zIy2EWdCVb00kuuwBoEv'
 const Pay = () => {
@@ -16,7 +17,7 @@ const Pay = () => {
           'http://localhost:5000/api/checkout/stripe-payment',
           {
             tokenId: stripeToken.id,
-            amount: 2000,
+            amount: 1000,
           }
         )
         console.log(res.data)
@@ -33,11 +34,13 @@ const Pay = () => {
         billingAddress
         shippingAddress
         description='Your total is $20'
-        amount={2000}
+        amount={1000}
         token={onToken}
         stripeKey={KEY}
       >
-        <button>PAY NOW</button>
+        <Button type='button' className='btn btn-block'>
+          PAY NOW
+        </Button>
       </StripeCheckout>
     </div>
   )

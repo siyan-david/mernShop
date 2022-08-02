@@ -29,6 +29,7 @@ const ProductEditScreen = () => {
   const { name, price, brand, description, category, countInStock } =
     productData
 
+  const { userInfo } = useSelector((state) => state.userLogin)
   const { loading, error, product } = useSelector(
     (state) => state.productDetails
   )
@@ -41,66 +42,89 @@ const ProductEditScreen = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+  // const handleChange = (e) => {
+  //   setImage(e.target.value)
+  // }
   useEffect(() => {
-    dispatch({ type: PRODUCT_CREATE_RESET })
+    if (product) {
+      if (product._id === productId) {
+        setProductData({
+          ...productData,
+          name: product.name,
+          price: product.price,
+          brand: product.brand,
+          description: product.description,
+          category: product.category,
+          countInStock: product.countInStock,
+        })
+        setImage(product.image)
+      } else {
+        dispatch(listProductDetails(productId))
+      }
+    } else {
+      dispatch(listProductDetails(productId))
+    }
+  }, [dispatch, product, setProductData, setImage])
+
+  useEffect(() => {
     if (successUpdate) {
       dispatch({ type: PRODUCT_UPDATE_RESET })
       navigate('/admin/productlist')
-    } else {
-      if (!product.name || product._id !== productId) {
-        return dispatch(listProductDetails(productId))
-      }
     }
-    setProductData({
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      brand: product.brand,
-      description: product.description,
-      category: product.category,
-      countInStock: product.countInStock,
-    })
-    setImage(product.image)
-  }, [navigate, dispatch, product, productId, setProductData, successUpdate])
-
-  const submitHandler = (e) => {
-    e.preventDefault()
-    // UPDATE PRODUCT
-    dispatch()
-    /*
-      updateProduct({
-        _id: product._id,
-        name,
-        price,
-        brand,
-        description,
-        category,
-        countInStock,
-        image,
-      })
-      */
-    updateProduct({})
-  }
+  }, [dispatch, navigate, successUpdate])
 
   const uploadFileHandler = async (e) => {
-    const file = e.target.file[0]
+    /*
+    const file = e.target.files[0]
+    console.log(file)
     const formData = new FormData()
     formData.append('image', file)
     setUploading(true)
-
     try {
       const config = {
         headers: {
-          Authorization: 'application/json',
           'Content-Type': 'multipart/form-data',
         },
       }
-      const { data } = await axios.patch('/api/upload', formData, config)
+      const { data } = await axios.post('/api/upload', formData, config)
       setImage(data)
       setUploading(false)
     } catch (error) {
       setUploading(false)
     }
+    */
+    e.preventDefault()
+    const file = e.target.files[0]
+    // console.log(file)
+    const formData = new FormData()
+    formData.append('image', file)
+    // setImage(e.target.files[0])
+    setUploading(true)
+
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${userInfo.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+      const { data } = await axios.post('/api/upload', formData, config)
+      setImage(data)
+      setUploading(false)
+    } catch (error) {
+      setUploading(false)
+    }
+  }
+  const submitHandler = (e) => {
+    e.preventDefault()
+    // UPDATE PRODUCT
+    dispatch(
+      updateProduct({
+        _id: productId,
+        ...productData,
+        image,
+      })
+    )
   }
   return (
     <>

@@ -4,10 +4,10 @@ import { composeWithDevTools } from 'redux-devtools-extension'
 import Cookie from 'js-cookie'
 import {
   productListReducer,
-  productAdminListReducer,
   productDetailsReducer,
   productDeleteReducer,
   productCreateReducer,
+  productTopRatedReducer,
   productCreateReviewReducer,
   productUpdateReducer,
 } from './reducers/productReducers'
@@ -32,12 +32,12 @@ import {
 
 export const reducer = combineReducers({
   productList: productListReducer,
-  productAdminList: productAdminListReducer,
   productDetails: productDetailsReducer,
   productDelete: productDeleteReducer,
   productCreate: productCreateReducer,
   productReview: productCreateReviewReducer,
   productUpdate: productUpdateReducer,
+  productTopRated: productTopRatedReducer,
   cart: cartReducer,
   userLogin: userLoginReducer,
   userRegister: userRegisterReducer,

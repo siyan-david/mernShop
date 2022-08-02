@@ -19,7 +19,7 @@ const CreateProductScreen = () => {
     countInStock: 0,
   })
 
-  const [image, setImage] = useState(null)
+  const [image, setImage] = useState('')
 
   const { name, price, brand, description, category, countInStock } =
     productDetails

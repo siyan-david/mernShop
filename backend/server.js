@@ -7,7 +7,6 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js'
 import connectDB from './config/db.js'
 // import products from './data/products.js'
 import productRoute from './routes/productRoute.js'
-import productAdmin from './routes/productAdminRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
@@ -33,7 +32,6 @@ app.get('/', (req, res) => {
 app.use(express.json())
 
 app.use('/api/products', productRoute)
-app.use('/api/admin/products', productAdmin)
 app.use('/api/users', userRoutes)
 app.use('/api/orders', orderRoutes)
 app.use('/api/upload', uploadRoutes)

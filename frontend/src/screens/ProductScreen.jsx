@@ -22,12 +22,8 @@ const ProductScreen = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const [review, setReview] = useState({
-    rating: 0,
-    comment: '',
-  })
-  const { rating, comment } = review
-
+  const [rating, setRating] = useState(0)
+  const [comment, setComment] = useState('')
   const productDetails = useSelector((state) => state.productDetails)
   const { loading, error, product } = productDetails
 
@@ -39,6 +35,7 @@ const ProductScreen = () => {
 
   const { userInfo } = useSelector((state) => state.userLogin)
 
+  // console.log(userInfo.id.toString())
   // const [product, setProduct] = useState({})
   // const alreadyReviewed = product.reviews.find(
   //   (r) => r.user.toString() === userInfo.user.id.toString()
@@ -64,15 +61,12 @@ const ProductScreen = () => {
     }
   }, [id])
 */
-
   useEffect(() => {
     if (successReview) {
       alert('Review Submitted')
+      setRating(0)
+      setComment('')
       dispatch({ type: PRODUCT_CREATE_REVIEW_RESET })
-      setReview({
-        review: 0,
-        comment: '',
-      })
     }
     dispatch(listProductDetails(id))
   }, [dispatch, id, successReview])
@@ -82,9 +76,22 @@ const ProductScreen = () => {
     navigate(`/cart/${id}?qty=${qty}`)
   }
 
-  const submitHandler = (e) => {
-    e.preventDefault()
-    dispatch(createProductReview(id, { rating, comment }))
+  // const submitHandler = (e) => {
+  //   e.preventDefault()
+  //   if (!rating || !comment) {
+  //     throw new Error('Please enter rating and comment')
+  //   } else {
+  //     return dispatch(createProductReview(id, { rating, comment }))
+  //   }
+  // }
+
+  const submitHandler = () => {
+    dispatch(
+      createProductReview(id, {
+        rating,
+        comment,
+      })
+    )
   }
 
   if (loadingReview) return <Loader />
@@ -185,7 +192,7 @@ const ProductScreen = () => {
                   <ListGroup.Item key={review._id}>
                     <strong>{review.name}</strong>
                     <Rating value={review.rating} />
-                    <p>{review.createdAt.subString(0, 10)}</p>
+                    <p>{review.createdAt.substring(0, 10)}</p>
                     <p>{review.comment}</p>
                   </ListGroup.Item>
                 ))}
@@ -212,12 +219,7 @@ const ProductScreen = () => {
                               min={0}
                               name='rating'
                               placeholder='Enter a rating between 0 and 5'
-                              onChange={(e) =>
-                                setReview({
-                                  ...review,
-                                  [e.target.name]: e.target.valueAsNumber,
-                                })
-                              }
+                              onChange={(e) => setRating(e.target.value)}
                             />
                           </Form.Group>
 
@@ -229,12 +231,7 @@ const ProductScreen = () => {
                               value={comment}
                               name='comment'
                               placeholder='Enter a comment'
-                              onChange={(e) =>
-                                setReview({
-                                  ...review,
-                                  [e.target.name]: e.target.value,
-                                })
-                              }
+                              onChange={(e) => setComment(e.target.value)}
                             ></Form.Control>
                           </Form.Group>
                           <Button type='submit' variant='primary'>

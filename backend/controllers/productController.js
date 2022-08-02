@@ -7,26 +7,30 @@ import Product from '../models/productModel.js'
 @access Public
 */
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({})
-  res.json(products)
-})
+  const pageSize = 8
+  const page = Number(req.query.pageNumber) || 1
 
-/* 
-@desc  Fetch all products
-@route GET /api/admin/products
-@access Private/Admin
-*/
-const getProductsByAdmin = asyncHandler(async (req, res) => {
-  const products = await Product.find({})
-  res.json(products)
-})
+  const keyword = req.query.keyword
+    ? {
+        name: {
+          $regex: req.query.keyword,
+          $options: 'i',
+        },
+      }
+    : {}
 
+  const count = await Product.countDocuments({ ...keyword })
+  const products = await Product.find({ ...keyword })
+    .limit(pageSize)
+    .skip(pageSize * page - 1)
+
+  res.json({ products, page, pages: Math.ceil(count / pageSize) })
+})
 /* 
 @desc  Fetch single products
 @route GET /api/products/:id
 @access Public
 */
-
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id)
   if (product) {
@@ -42,7 +46,6 @@ const getProductById = asyncHandler(async (req, res) => {
 @route POST /api/products/
 @access Private/Admin
 */
-
 const createProduct = asyncHandler(async (req, res, next) => {
   try {
     const file = req.file
@@ -50,15 +53,14 @@ const createProduct = asyncHandler(async (req, res, next) => {
       res.status(404)
       throw new Error('No Image provided!')
     }
-    const fileName = file.filename
     const basePath = `${req.protocol}://${req.get('host')}/uploads/`
+    const fileName = file.filename
     // const imgPath = req.path.(/\\/g, 'uploads/')
     // const imgPath = req.path.replace('\\', '/uploads')
     const product = new Product({
       name: req.body.name,
       user: req.user._id,
       price: req.body.price,
-      // image: imagePath,
       image: `${basePath}${fileName}`,
       brand: req.body.brand,
       category: req.body.category,
@@ -78,61 +80,18 @@ const createProduct = asyncHandler(async (req, res, next) => {
     }
     next(error)
   }
-  // res.send(`/${req.file.path}`)
-  // res.send(req.file.path)
 })
-
-// const createProduct = asyncHandler(async (req, res) => {
-//   const product = new Product({
-//     name: 'Sample Product',
-//     price: 0,
-//     user: req.user._id,
-//     image: '/images/sample.jpg',
-//     brand: 'Product Brand',
-//     category: 'Product Category',
-//     countInStock: 0,
-//     numReviews: 0,
-//     description: 'Product Description',
-//   })
-
-//   const createdProduct = await product.save()
-//   if (!createdProduct) {
-//     res.status(404).json({ message: 'Error creating product' })
-//   }
-//   res
-//     .status(200)
-//     .json({ message: 'Product created successfully', createdProduct })
-// })
 
 /* 
 @desc  Update a product
-@route PUT /api/products/:id
+@route PATCH /api/products/:id
 @access Private/Admin
 */
 const updateProduct = asyncHandler(async (req, res) => {
-  /*
-  const { name, price, brand, category, countInStock, description } = req.body
   const product = await Product.findById(req.params.id)
-  if (product) {
-    product.name = name
-    product.price = price
-    product.image = image
-    product.brand = brand
-    product.category = category
-    product.countInStock = countInStock
-    product.description = description
-    const createdProduct = await product.save()
-    res.status(201).json(createdProduct)
-  } else {
-    res.status(404).json({ message: 'Error updating product' })
-    throw new Error('Product not found')
-  }
-*/
-  const product = await Product.findById(req.params.id)
-  if (!req.file) return res.status(404).json({ message: 'No image provided' })
+  // if (!req.file) return res.status(404).json({ message: 'No image provided' })
   const updatedProduct = await Product.findByIdAndUpdate(
     product._id,
-    // { image: req.file.path },
     { $set: { ...req.body } },
     { new: true }
   )
@@ -169,17 +128,21 @@ const deleteProductById = asyncHandler(async (req, res) => {
 @access Private
 */
 const createProductReview = asyncHandler(async (req, res) => {
-  const product = await Product.findById(req.params.id)
+  const productId = req.params.id
+  const product = await Product.findById(productId)
   const { rating, comment } = req.body
   if (product) {
     const alreadyReviewed = product.reviews.find(
-      (r) => r.user.toString() === req.user.toString()
+      (r) => r.user.toString() === req.user._id.toString()
     )
 
+    res.json(alreadyReviewed)
+
     if (alreadyReviewed) {
-      res.status(401)
+      res.status(400)
       throw new Error('Product already reviewed')
     }
+
     const review = {
       name: req.user.name,
       rating: Number(rating),
@@ -195,18 +158,33 @@ const createProductReview = asyncHandler(async (req, res) => {
     product.rating =
       product.reviews.reduce((prev, item) => item.rating + prev, 0) /
       product.reviews.length
-    await product.save()
-    res.status(201).json({ message: 'Review added successfully' })
+    const updatedProduct = await product.save()
+    res.status(201).json({
+      message: 'Review created',
+      review: updateProduct.reviews[updatedProduct.reviews.length - 1],
+      numReviews: product.numReviews,
+      rating: product.rating,
+    })
   } else {
     res.status(404)
     throw new Error('Product not found')
   }
 })
 
+/* 
+@desc  Get top rated products
+@ GET /api/products/top
+@access Public
+*/
+const getTopProducts = asyncHandler(async (req, res) => {
+  const products = await Product.find({}).sort({ rating: -1 }).limit(3)
+  res.json(products)
+})
+
 export {
   getProducts,
-  getProductsByAdmin,
   getProductById,
+  getTopProducts,
   deleteProductById,
   createProduct,
   createProductReview,

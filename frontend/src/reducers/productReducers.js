@@ -2,10 +2,6 @@ import {
   PRODUCT_LIST_REQUEST,
   PRODUCT_LIST_SUCCESS,
   PRODUCT_LIST_FAIL,
-  PRODUCT_ADMIN_LIST_REQUEST,
-  PRODUCT_ADMIN_LIST_SUCCESS,
-  PRODUCT_ADMIN_LIST_FAIL,
-  PRODUCT_ADMIN_LIST_RESET,
   PRODUCT_DETAILS_REQUEST,
   PRODUCT_DETAILS_SUCCESS,
   PRODUCT_DETAILS_FAIL,
@@ -24,6 +20,9 @@ import {
   PRODUCT_UPDATE_SUCCESS,
   PRODUCT_UPDATE_FAIL,
   PRODUCT_UPDATE_RESET,
+  PRODUCT_TOP_REQUEST,
+  PRODUCT_TOP_SUCCESS,
+  PRODUCT_TOP_FAIL,
 } from '../constants/productConstants'
 
 export const productListReducer = (state = { products: [] }, action) => {
@@ -32,25 +31,14 @@ export const productListReducer = (state = { products: [] }, action) => {
     case PRODUCT_LIST_REQUEST:
       return { loading: true, products: [] }
     case PRODUCT_LIST_SUCCESS:
-      return { loading: false, products: payload }
+      return {
+        products: payload.products,
+        pages: payload.pages,
+        page: payload.page,
+        loading: false,
+      }
     case PRODUCT_LIST_FAIL:
       return { loading: false, error: payload }
-    default:
-      return state
-  }
-}
-
-export const productAdminListReducer = (state = { products: [] }, action) => {
-  const { type, payload } = action
-  switch (type) {
-    case PRODUCT_ADMIN_LIST_REQUEST:
-      return { loading: true, products: [] }
-    case PRODUCT_ADMIN_LIST_SUCCESS:
-      return { loading: false, products: payload }
-    case PRODUCT_ADMIN_LIST_FAIL:
-      return { loading: false, error: payload }
-    case PRODUCT_ADMIN_LIST_RESET:
-      return { products: [] }
     default:
       return state
   }
@@ -108,7 +96,7 @@ export const productCreateReviewReducer = (state = {}, action) => {
     case PRODUCT_CREATE_REVIEW_REQUEST:
       return { loading: true }
     case PRODUCT_CREATE_REVIEW_SUCCESS:
-      return { loading: false, success: true, error: null }
+      return { loading: false, success: true }
     case PRODUCT_CREATE_REVIEW_FAIL:
       return { loading: false, error: payload }
     case PRODUCT_CREATE_REVIEW_RESET:
@@ -129,6 +117,20 @@ export const productUpdateReducer = (state = { product: {} }, action) => {
       return { loading: false, error: payload }
     case PRODUCT_UPDATE_RESET:
       return { product: {} }
+    default:
+      return state
+  }
+}
+
+export const productTopRatedReducer = (state = { products: [] }, action) => {
+  const { type, payload } = action
+  switch (type) {
+    case PRODUCT_TOP_REQUEST:
+      return { loading: true, products: [] }
+    case PRODUCT_TOP_SUCCESS:
+      return { loading: false, products: payload }
+    case PRODUCT_TOP_FAIL:
+      return { loading: false, error: payload }
     default:
       return state
   }

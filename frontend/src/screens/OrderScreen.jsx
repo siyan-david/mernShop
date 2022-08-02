@@ -81,36 +81,6 @@ const OrderScreen = () => {
     )
   }
 
-  const successPaymentHandler = (paymentResult) => {
-    console(paymentResult)
-    dispatch(savePaymentMethod('paypal'))
-    dispatch(payOrder(orderId, { paymentResult, paymentMode: 'paypal' }))
-  }
-
-  // const successStripeHandler = (paymentResult) => {
-  //   console.log(paymentResult)
-  //   dispatch(payOrder(orderId, { paymentResult }))
-  // }
-
-  // const stackSuccessHandler = (req, res) => {
-  //   console.log(res.status(200))
-
-  //   if (res.status !== 'success') {
-  //     // redirect to a failure page.
-  //     throw new Error('Failed Resource')
-  //   }
-
-  //   const paymentResult = {
-  //     id: res.transaction,
-  //     status: res.status,
-  //     update_time: new Date(Date.now()).toISOString(),
-  //     // email_address: res.customer.email,
-  //     // reference
-  //   }
-
-  //   dispatch(payOrder(orderId, paymentResult))
-  // }
-
   useEffect(() => {
     if (!order || order._id !== orderId || successPay || successDeliver) {
       if (successPay) return dispatch({ type: ORDER_PAY_RESET })
@@ -150,28 +120,11 @@ const OrderScreen = () => {
     successDeliver,
   ])
 
-  // const onToken = (token) => {
-  //   setStripeToken(token)
-  // }
-
-  // useEffect(() => {
-  //   const makeRequest = async () => {
-  //     try {
-  //       const { data } = await axios.post('/api/v1/stripe-payment', {
-  //         tokenId: stripeToken.id,
-  //         amount: 1000,
-  //       })
-  //       navigate('/', {
-  //         stripeData: data,
-  //         product: cartItems,
-  //       })
-  //     } catch (error) {
-  //       throw new Error(error.message)
-  //     }
-  //   }
-  //   if (!userInfo) navigate('/login')
-  //   stripeToken && makeRequest()
-  // }, [stripeToken, cartItems, navigate, userInfo])
+  const successPaymentHandler = (paymentResult) => {
+    console(paymentResult)
+    dispatch(savePaymentMethod('paypal'))
+    dispatch(payOrder(orderId, { paymentResult, paymentMode: 'paypal' }))
+  }
 
   const deliverHandler = () => {
     dispatch(deliverOrder(order))
