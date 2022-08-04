@@ -30,7 +30,7 @@ const ProductCarousel = () => {
             {/* <img src={product.image} alt={product.name} /> */}
             <Carousel.Caption className='carousel-caption'>
               <h2>
-                {product.name} ({product.price})
+                {product.name} (${product.price})
               </h2>
             </Carousel.Caption>
           </Link>

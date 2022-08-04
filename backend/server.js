@@ -11,6 +11,7 @@ import userRoutes from './routes/userRoutes.js'
 import orderRoutes from './routes/orderRoutes.js'
 import uploadRoutes from './routes/uploadRoutes.js'
 import stripeRoutes from './routes/stripeRoutes.js'
+import { ppid } from 'process'
 
 dotenv.config()
 connectDB()
@@ -24,10 +25,6 @@ const NODE_ENV = process.env.NODE_ENV
 if (NODE_ENV === 'development') {
   app.use(morgan('dev'))
 }
-
-app.get('/', (req, res) => {
-  res.send('API is running...')
-})
 
 app.use(express.json())
 
@@ -49,6 +46,17 @@ app.use('/api/config/paystack', (req, res) => {
 const __dirname = path.resolve()
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')))
 
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '/frontend/build')))
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))
+  })
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running...')
+  })
+}
 // custom 404 error middleware
 app.use(notFound)
 

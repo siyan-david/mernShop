@@ -65,7 +65,7 @@ h2 {
 
 .carousel-caption h2 {
   color: #fff;
-
+  line-height: 1.2rem;
 }
 
 .carousel img {
@@ -77,6 +77,6 @@ h2 {
 }
 
 main.py-10{
-  padding-bottom: 1rem!important;
-  padding-top: 1rem!important;
+  padding-bottom: 1rem;
+  padding-top: 1rem;
 }

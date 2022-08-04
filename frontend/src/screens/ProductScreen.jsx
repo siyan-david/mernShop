@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom'
 import { Row, Col, Image, ListGroup, Card, Button, Form } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import Rating from '../components/Rating'
+import Meta from '../components/Meta'
 import {
   listProductDetails,
   createProductReview,
@@ -107,6 +108,11 @@ const ProductScreen = () => {
         <Message variant='danger'>{error}</Message>
       ) : (
         <>
+          <Meta
+            title={product.name}
+            description={product.description}
+            keywords={`affordable ${product.category}, best ${product.category} product`}
+          />
           <Row>
             <Col md={6}>
               <Image src={product.image} alt={product.name} fluid />

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import Meta from '../components/Meta'
 import { useDispatch, useSelector } from 'react-redux'
 import { Col, Row } from 'react-bootstrap'
 import Product from '../components/Product'
@@ -51,6 +52,7 @@ const HomeScreen = () => {
     // </>
 
     <>
+      <Meta />
       {!keyword ? (
         <ProductCarousel />
       ) : (
